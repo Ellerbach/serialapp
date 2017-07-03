@@ -7,6 +7,22 @@ namespace serialapp
         static void Main(string[] args)
         {
             Console.WriteLine("Hello Serial port!");
+            var ports = SerialDevice.GetPortNames();
+            bool isTTY = false;
+            foreach (var prt in ports)
+            {
+                Console.WriteLine($"Serial name: {prt}");
+                if (prt.Contains("ttyS0"))
+                {
+                    isTTY = true;
+                }
+            }
+            if (!isTTY)
+            {
+                Console.WriteLine("No ttyS0 serial port!");
+                return;
+            }
+            Console.WriteLine("Yes, we have the embedded serial port available, opening it");
             SerialDevice mySer = new SerialDevice("/dev/ttyS0", BaudRate.B1152000);
             mySer.DataReceived += MySer_DataReceived;
             while (!Console.KeyAvailable)
