@@ -16,7 +16,7 @@ In short, here are the steps you need to follow to activate the serial port.
 
 Open a command line and type:
 ```CMD
-sudo rpi-upgrade
+sudo rpi-update
 ```
 You'll have to wait for all to be installed, it takes couple of minutes.
 Then reboot. Once rebooted, you will have to activate in the boot option the serial port.
