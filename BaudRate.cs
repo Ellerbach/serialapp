@@ -1,6 +1,6 @@
-namespace serialapp
+unamespace serialapp
 {
-    public enum BaudRate : long
+    public enum BaudRate : uint
     {
         B1200 = 1200,
         B2400 = 2400,
