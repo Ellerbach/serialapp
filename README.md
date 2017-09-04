@@ -149,8 +149,10 @@ namespace serialapp
             Console.WriteLine("Yes, we have the embedded serial port available, opening it");
             SerialDevice mySer = new SerialDevice("/dev/ttyS0", BaudRate.B1152000);
             mySer.DataReceived += MySer_DataReceived;
+            mySer.Open();
             while (!Console.KeyAvailable)
                 ;
+            mySer.Close();
         }
         private static void MySer_DataReceived(object arg1, byte[] arg2)
         {
