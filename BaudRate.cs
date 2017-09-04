@@ -1,4 +1,4 @@
-unamespace serialapp
+namespace serialapp
 {
     public enum BaudRate : uint
     {

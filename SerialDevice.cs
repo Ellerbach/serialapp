@@ -43,10 +43,8 @@ namespace serialapp
             Libc.tcgetattr(fd, termiosData);
             Libc.cfsetspeed(termiosData, baudRate);
             Libc.tcsetattr(fd, 0, termiosData);
-
             // start reading
             Task.Run((Action)StartReading, CancellationToken);
-
             this.fd = fd;
         }
 
