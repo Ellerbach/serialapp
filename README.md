@@ -1,6 +1,6 @@
 # Using embedded GPIO UART serial port with .NET Core 2.0 on a Raspberry PI 3 running Linux
 
-**Important note** : the date of this article is early June 2017. Many technologies described here are in beta, preview or still not fully available. If you read this article later, you may have to do things a bit differently.
+**Important note** : the date of this article is early June 2017 with an update in Septembre 2017 after the release of .NET Core 2.0. Some technologies described here are in beta, preview or still not fully available. If you read this article later, you may have to do things a bit differently.
 
 I have an arduino connected to a Rapsberry PI 3 running Linux thru the embedded UART. It's the one you access thru the GPIO on physical pins 8 and 10 and logical GPIO14 and GPIO15. I used to access this Arduino for analogic data. I rencently wanted to test .NET Copre 2.0 and see how it can work on a RPI running a Linux ARM architecture. Support for Linux ARM with .NET Core 2.0 is still in preview and quite new.
 
@@ -63,7 +63,7 @@ sudo apt-get install libunwind8 libunwind8-dev gettext libicu-dev liblttng-ust-d
 Now you should be all good to and all dependencies should be installed for you to run a netcode 2.0 appplication.
 
 ## Step 3: installing the .NET Core 2 SDK on a supported platform
-My choice goes for Windows. But you can choose any platform. [Instruction for Windows are here](https://www.microsoft.com/net/core/preview#windowscmd "Instruction for Windows are here"). Make sure you install the preview. You can as well install daily builds and you can find them here.
+My choice goes for Windows. But you can choose any platform. [Instruction for Windows are here](https://www.microsoft.com/net/core/preview#windowscmd "Instruction for Windows are here"). Make sure you install the .NE TCore 2.0. You can as well install daily builds and you can find them [here](https://github.com/dotnet/core/blob/master/daily-builds.md ".NET Core Daily Builds").
 You'll find from the same URL the other plateformes like Linux and Mac OS. I've tested MacOS and is does work perfectly as well. Be carreful and follow all instructions as you may have dependency issues. 
 
 ## Step 4: creating a simple console app
