@@ -228,7 +228,7 @@ namespace serialapp
     public static string[] GetPortNames()
     {
         int p = (int)Environment.OSVersion.Platform;
-        List&lt;string&gt; serial_ports = new List&lt;string&gt;();
+        List serial_ports = new List();
 
         // Are we on Unix?
         if (p == 4 || p == 128 || p == 6)
