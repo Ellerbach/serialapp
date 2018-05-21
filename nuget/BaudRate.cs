@@ -1,4 +1,4 @@
-namespace serialapp
+namespace System.IO.Ports
 {
     public enum BaudRate : uint
     {

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace serialapp
+namespace System.IO.Ports
 {
     public class SerialDevice
     {

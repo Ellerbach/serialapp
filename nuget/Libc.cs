@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace serialapp
+namespace System.IO.Ports
 {
     public static class Libc
     {

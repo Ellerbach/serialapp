@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Laurent Ellerbach</Authors>
+    <Company>Laurent Ellerbach</Company>
+    <Description>This package allow support for Serial Port in all Linux flavor Os including iOS for .NET Core. It does implement a System.IO.Ports for Linux and iOS devices for .NET core using standard libc.</Description>
+    <Copyright>Laurent Ellerbach</Copyright>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/Ellerbach/serialapp/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/Ellerbach/serialapp</PackageProjectUrl>
+    <PackageIconUrl>https://github.com/Ellerbach/serialapp/blob/master/docs/serial.png?raw=true</PackageIconUrl>
+    <RepositoryUrl>https://github.com/Ellerbach/serialapp</RepositoryUrl>
+    <PackageTags>Serial;SerialPort;SerialPort NetCore;SerialPort .NET Core;Serial Port .NET Core;SerialPort NETCore Linux;Serial Port iOS;SerialPort iOS;Serial Port Linux;System.IO.Ports</PackageTags>
+    <ApplicationIcon>serial.ico</ApplicationIcon>
+    <PackageId>NetCoreSerial</PackageId>
+  </PropertyGroup>
+
+</Project>

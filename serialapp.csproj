@@ -6,8 +6,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="nuget\**" />
+    <EmbeddedResource Remove="nuget\**" />
+    <None Remove="nuget\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove=".gitattributes" />
     <None Remove=".gitignore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="nuget\NetCoreSerial.csproj" />
   </ItemGroup>
 
 </Project>

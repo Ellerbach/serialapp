@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26621.2
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "serialapp", "serialapp.csproj", "{786BB6CB-C057-4857-A77A-78B6DBFE1BE7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCoreSerial", ".\nuget\NetCoreSerial.csproj", "{F31E065F-4BB3-4BD3-ABC3-FF090F75120E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{786BB6CB-C057-4857-A77A-78B6DBFE1BE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{786BB6CB-C057-4857-A77A-78B6DBFE1BE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{786BB6CB-C057-4857-A77A-78B6DBFE1BE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F31E065F-4BB3-4BD3-ABC3-FF090F75120E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F31E065F-4BB3-4BD3-ABC3-FF090F75120E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F31E065F-4BB3-4BD3-ABC3-FF090F75120E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F31E065F-4BB3-4BD3-ABC3-FF090F75120E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
