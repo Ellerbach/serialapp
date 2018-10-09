@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace System.IO.Ports
 {
-    public class SerialDevice
+    public class SerialDevice:IDisposable
     {
         public const int READING_BUFFER_SIZE = 1024;
 
@@ -130,6 +130,7 @@ namespace System.IO.Ports
 
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             if (IsOpened)
             {
                 Close();
