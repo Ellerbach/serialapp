@@ -24,11 +24,12 @@ namespace serialapp
                 return;
             }
             Console.WriteLine("Yes, we have the embedded serial port available, opening it");
-            SerialDevice mySer = new SerialDevice("/dev/ttyS0", BaudRate.B1152000);
+            SerialDevice mySer = new SerialDevice("/dev/serial0", BaudRate.B115200);
+            Console.ReadLine();
             mySer.DataReceived += MySer_DataReceived;
             mySer.Open();
-            while (!Console.KeyAvailable)
-                ;
+            mySer.Write(System.Text.Encoding.UTF8.GetBytes("Hello Serial port!"));
+            while (!Console.KeyAvailable);
             mySer.Close();
         }
 
