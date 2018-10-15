@@ -117,11 +117,21 @@ namespace System.IO.Ports
                 foreach (string dev in ttys)
                 {
                     //Arduino MEGAs show up as ttyACM due to their different USB<->RS232 chips
-                    if (dev.StartsWith("/dev/ttyS") || dev.StartsWith("/dev/ttyUSB") || dev.StartsWith("/dev/ttyACM") || dev.StartsWith("/dev/ttyAMA"))
+                    if (dev.StartsWith("/dev/ttyS") 
+                        || dev.StartsWith("/dev/ttyUSB") 
+                        || dev.StartsWith("/dev/ttyACM") 
+                        || dev.StartsWith("/dev/ttyAMA") 
+                        || dev.StartsWith("/dev/serial"))
                     {
                         serial_ports.Add(dev);
                         //Console.WriteLine("Serial list: {0}", dev);
                     }
+                }
+                //newer Pi with bluetooth map serial
+                ttys = System.IO.Directory.GetFiles("/dev/", "serial*");
+                foreach (string dev in ttys)
+                {
+                    serial_ports.Add(dev);
                 }
             }
             
