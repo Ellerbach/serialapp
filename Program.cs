@@ -8,6 +8,8 @@ namespace serialapp
         static void Main(string[] args)
         {
             Console.WriteLine("Hello Serial port!");
+            Console.WriteLine("Attach debugger and press any key to continue");
+            Console.ReadLine();
             var ports = SerialDevice.GetPortNames();
             bool isTTY = false;
             foreach (var prt in ports)
@@ -24,11 +26,11 @@ namespace serialapp
                 return;
             }
             Console.WriteLine("Yes, we have the embedded serial port available, opening it");
-            SerialDevice mySer = new SerialDevice("/dev/ttyS0", BaudRate.B1152000);
+            SerialDevice mySer = new SerialDevice("/dev/serial0", BaudRate.B115200);
             mySer.DataReceived += MySer_DataReceived;
             mySer.Open();
-            while (!Console.KeyAvailable)
-                ;
+            mySer.Write(System.Text.Encoding.UTF8.GetBytes("Hello Serial port!"));
+            while (!Console.KeyAvailable);
             mySer.Close();
         }
 
