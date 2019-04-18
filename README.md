@@ -1,6 +1,8 @@
 # Using embedded GPIO UART serial port with .NET Core 2.0 on a Raspberry PI 3 running Linux
 
-**Note** : A Nuget Package has been release to include support of Serial Port in Linux and iOS. You can find it searching for [NetCoreSerial](https://www.nuget.org/packages/NetCoreSerial/). You still can use the source code in your own code.
+**There is now an official support for System.IO.Ports in the main [.NET Core repository](https://github.com/dotnet/corefx/tree/master/src/System.IO.Ports.). The nudget is still in preview, so you have to add preview for the System.IO.Ports nuget and the install it. This will allow you to enjoy a much better package than this one. If you are still using old version of .NET Core, then this one may help you. The new package is working for version higher than 2.2 including 3.**
+
+**Note**: A Nuget Package has been release to include support of Serial Port in Linux and MacOS. You can find it searching for [NetCoreSerial](https://www.nuget.org/packages/NetCoreSerial/). You still can use the source code in your own code.
 
 I have an arduino connected to a Rapsberry PI 3 running Linux thru the embedded UART. It's the one you access thru the GPIO on physical pins 8 and 10 and logical GPIO14 and GPIO15. I used to access this Arduino for analogic data. I rencently wanted to test .NET Copre 2.0 and see how it can work on a RPI running a Linux ARM architecture. Support for Linux ARM with .NET Core 2.0 is still in preview and quite new.
 
