@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.IO.Ports
 {
-    public class SerialDevice:IDisposable
+    public class SerialDevice : IDisposable
     {
         public const int READING_BUFFER_SIZE = 1024;
 
@@ -37,16 +38,25 @@ namespace System.IO.Ports
                 throw new Exception($"failed to open port ({portName})");
             }
 
-            // set baud rate
-            byte[] termiosData = new byte[256];
-
+            // set baud rate            
+            byte[] termiosData = new byte[Marshal.SizeOf(typeof(Termios))];
             Libc.tcgetattr(fd, termiosData);
-            Libc.cfsetspeed(termiosData, baudRate);
+            Termios terminos = TermiosHelpers.fromBytes(termiosData);
+            // Set ICANON off
+            terminos.LocalFalg = terminos.LocalFalg & (~(uint)LocalFlags.ICANON);
+            // Set ECHO off
+            terminos.LocalFalg = terminos.LocalFalg & (~(uint)LocalFlags.ECHO);
+            terminos.LocalFalg = terminos.LocalFalg & (~(uint)LocalFlags.ECHOE);
+            terminos.LocalFalg = terminos.LocalFalg & (~(uint)LocalFlags.ECHOCTL);
+            terminos.LocalFalg = terminos.LocalFalg & (~(uint)LocalFlags.IEXTEN);
+            terminos.LocalFalg = terminos.LocalFalg & (~(uint)LocalFlags.ISIG);            
+            termiosData = TermiosHelpers.getBytes(terminos);
+            Libc.cfsetspeed(termiosData, baudRate);          
             Libc.tcsetattr(fd, 0, termiosData);
             // start reading
             this.fd = fd;
             Task.Run((Action)StartReading, CancellationToken);
-            
+
         }
 
         private void StartReading()
@@ -118,10 +128,10 @@ namespace System.IO.Ports
                 foreach (string dev in ttys)
                 {
                     //Arduino MEGAs show up as ttyACM due to their different USB<->RS232 chips
-                    if (dev.StartsWith("/dev/ttyS") 
-                        || dev.StartsWith("/dev/ttyUSB") 
-                        || dev.StartsWith("/dev/ttyACM") 
-                        || dev.StartsWith("/dev/ttyAMA") 
+                    if (dev.StartsWith("/dev/ttyS")
+                        || dev.StartsWith("/dev/ttyUSB")
+                        || dev.StartsWith("/dev/ttyACM")
+                        || dev.StartsWith("/dev/ttyAMA")
                         || dev.StartsWith("/dev/serial"))
                     {
                         serial_ports.Add(dev);
@@ -135,7 +145,7 @@ namespace System.IO.Ports
                     serial_ports.Add(dev);
                 }
             }
-            
+
             return serial_ports.ToArray();
         }
 
