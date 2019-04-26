@@ -14,6 +14,7 @@ namespace System.IO.Ports
         CS7 = (1 << 9),     // 7 bits per byte.  
         CS8 = (CS6 | CS7),  // 8 bits per byte.  
         CSTOPB = (1 << 10), // Two stop bits instead of one.  
+        CMSPAR = (1 << 10), // Used for space and mark parities
         CREAD = (1 << 11),  // Enable receiver.  
         PARENB = (1 << 12), // Parity enable.  
         PARODD = (1 << 13), // Odd parity instead of even.  

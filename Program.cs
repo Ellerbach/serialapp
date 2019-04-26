@@ -8,8 +8,6 @@ namespace serialapp
         static void Main(string[] args)
         {
             Console.WriteLine("Hello Serial port!");
-            Console.WriteLine("Attach debugger and press any key to continue");
-            Console.ReadLine();
             var ports = SerialDevice.GetPortNames();
             bool isTTY = false;
             foreach (var prt in ports)

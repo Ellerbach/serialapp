@@ -9,73 +9,307 @@ namespace System.IO.Ports
 {
     public class SerialDevice : IDisposable
     {
-        public const int READING_BUFFER_SIZE = 1024;
+
+        private const int MaxDataBits = 8;
+        private const int MinDataBits = 5;
+        private const bool DefaultDtrEnable = false;
+        private const bool DefaultRtsEnable = false;
+        private const int DefaultDataBits = 8;
+        private const Parity DefaultParity = Parity.None;
+        private const StopBits DefaultStopBits = StopBits.One;
+        private const Handshake DefaultHandshake = Handshake.None;
+        public const int DefaultReadBuffer = 4096;
 
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
-        private CancellationToken CancellationToken => cts.Token;
-
-        private int? fd;
-        private readonly IntPtr readingBuffer = Marshal.AllocHGlobal(READING_BUFFER_SIZE);
-
-        protected readonly string portName;
-
-        protected readonly BaudRate baudRate;
+        private CancellationToken _CancellationToken => cts.Token;
+        private int? _FileDescriptor;
+        private readonly IntPtr _ReadingBuffer = Marshal.AllocHGlobal(DefaultReadBuffer);
+        protected readonly string _PortName;
+        protected BaudRate _BaudRate;
+        protected int _DataBits = DefaultDataBits;
+        protected Parity _Parity = DefaultParity;
+        protected StopBits _StopBits = DefaultStopBits;
+        protected Handshake _Handshake = DefaultHandshake;
 
         public event Action<object, byte[]> DataReceived;
-        public SerialDevice(string portName, BaudRate baudRate)
+
+        public SerialDevice(string portName, BaudRate baudRate, Parity parity, int dataBits, StopBits stopBits) : this(portName, baudRate, parity, dataBits, stopBits, DefaultHandshake)
+        { }
+
+        public SerialDevice(string portName, BaudRate baudRate, Parity parity, int dataBits) : this(portName, baudRate, parity, dataBits, DefaultStopBits, DefaultHandshake)
+        { }
+
+        public SerialDevice(string portName, BaudRate baudRate, Parity parity) : this(portName, baudRate, parity, DefaultDataBits, DefaultStopBits, DefaultHandshake)
+        { }
+
+        public SerialDevice(string portName, BaudRate baudRate) : this(portName, baudRate, DefaultParity, DefaultDataBits, DefaultStopBits, DefaultHandshake)
+        { }
+
+        public SerialDevice(string portName, BaudRate baudRate, Parity parity, int dataBits, StopBits stopBits, Handshake handshake)
         {
-            this.portName = portName;
-            this.baudRate = baudRate;
+            _PortName = portName;
+            _BaudRate = baudRate;
+            _Parity = parity;
+            _DataBits = dataBits;
+            _StopBits = stopBits;
+            _Handshake = handshake;
         }
+
+        public BaudRate BaudRate
+        {
+            get { return _BaudRate; }
+            set
+            {
+                _BaudRate = value;
+                if (IsOpen)
+                {
+                    SetBaudRate(_BaudRate);
+                }
+            }
+        }
+
+        public int DataBits
+        {
+            get { return _DataBits; }
+            set
+            {
+                if ((value < MinDataBits) || value > MaxDataBits) throw new ArgumentException($"{nameof(DataBits)} can only be between {MinDataBits} and {MaxDataBits}");
+                _DataBits = value;
+                if (IsOpen)
+                {
+                    SetDataBits(_DataBits);
+                }
+            }
+        }
+
+        public Parity Parity
+        {
+            get { return _Parity; }
+            set
+            {
+                _Parity = value;
+                if (IsOpen)
+                {
+                    SetParity(_Parity);
+                }
+            }
+        }
+
+        public StopBits StopBits
+        {
+            get { return _StopBits;  }
+            set
+            {
+                _StopBits = value;
+                if (IsOpen)
+                {
+                    SetStopBits(_StopBits);
+                }
+            }
+        }
+
+        public Handshake Handshake
+        {
+            get { return _Handshake;  }
+            set
+            {
+                _Handshake = value;
+                if (IsOpen)
+                {
+                    SetHandshake(_Handshake);
+                }
+            }
+        }
+
+        public bool IsOpen => _FileDescriptor.HasValue;
 
         public void Open()
         {
+            if (IsOpen) throw new IOException($"Port already open");
+
             // open serial port
-            int fd = Libc.open(portName, Libc.OpenFlags.O_RDWR | Libc.OpenFlags.O_NONBLOCK);
+            int fd = Libc.open(_PortName, Libc.OpenFlags.O_RDWR | Libc.OpenFlags.O_NONBLOCK);
+            if (fd == -1) throw new Exception($"failed to open port ({_PortName})");
 
-            if (fd == -1)
-            {
-                throw new Exception($"failed to open port ({portName})");
-            }
-
-            // set baud rate            
-            byte[] termiosData = new byte[Marshal.SizeOf(typeof(Termios))];
-            Libc.tcgetattr(fd, termiosData);
-            Termios terminos = TermiosHelpers.fromBytes(termiosData);
+            _FileDescriptor = fd;
+            // Initilise the serial port
+            Termios termios = GetTermios();
+            // Make sure we are ok to read
+            termios.ControlFlag |= (uint)ControlFlags.CREAD;
+            termios.ControlFlag |= (uint)ControlFlags.CLOCAL;
+            //Clean the output flags
+            termios.OutputFlag &= ~(uint)OutputFlags.OPOST;
+            // Clear what can be on the input flags
+            termios.InputFlag &= ~(uint)(InputFlags.IGNBRK | InputFlags.BRKINT | InputFlags.ICRNL |
+                        InputFlags.PARMRK | InputFlags.INLCR | InputFlags.ISTRIP | InputFlags.IXON);
             // Set ICANON off
-            terminos.LocalFalg = terminos.LocalFalg & (~(uint)LocalFlags.ICANON);
+            termios.LocalFalg &= ~(uint)LocalFlags.ICANON;
             // Set ECHO off
-            terminos.LocalFalg = terminos.LocalFalg & (~(uint)LocalFlags.ECHO);
-            terminos.LocalFalg = terminos.LocalFalg & (~(uint)LocalFlags.ECHOE);
-            terminos.LocalFalg = terminos.LocalFalg & (~(uint)LocalFlags.ECHOCTL);
-            terminos.LocalFalg = terminos.LocalFalg & (~(uint)LocalFlags.IEXTEN);
-            terminos.LocalFalg = terminos.LocalFalg & (~(uint)LocalFlags.ISIG);            
-            termiosData = TermiosHelpers.getBytes(terminos);
-            Libc.cfsetspeed(termiosData, baudRate);          
-            Libc.tcsetattr(fd, 0, termiosData);
+            termios.LocalFalg &= ~(uint)LocalFlags.ECHO;
+            termios.LocalFalg &= ~(uint)LocalFlags.ECHOE;
+            termios.LocalFalg &= ~(uint)LocalFlags.ECHOCTL;
+            termios.LocalFalg &= ~(uint)LocalFlags.IEXTEN;
+            termios.LocalFalg &= ~(uint)LocalFlags.ISIG;
+            SetTermios(termios);
+            SetBaudRate(_BaudRate);
+            SetDataBits(_DataBits);
+            SetParity(_Parity);
+            SetStopBits(_StopBits);
             // start reading
-            this.fd = fd;
-            Task.Run((Action)StartReading, CancellationToken);
+            Task.Run((Action)StartReading, _CancellationToken);
 
+        }
+
+        private Termios GetTermios()
+        {
+            byte[] termiosData = new byte[Marshal.SizeOf(typeof(Termios))];
+            Libc.tcgetattr(_FileDescriptor.Value, termiosData);
+            return TermiosHelpers.fromBytes(termiosData);
+        }
+
+        private void SetTermios(Termios terminos)
+        {
+            byte[] termiosData = TermiosHelpers.getBytes(terminos);            
+            Libc.tcsetattr(_FileDescriptor.Value, 0, termiosData);
+        }
+
+        private void SetBaudRate(BaudRate baudRate)
+        {
+            byte[] termiosData = new byte[Marshal.SizeOf(typeof(Termios))];
+            Libc.tcgetattr(_FileDescriptor.Value, termiosData);
+            Libc.cfsetspeed(termiosData, baudRate);
+        }
+
+        private void SetParity(Parity parity)
+        {
+            Termios termios = GetTermios();
+            switch (parity)
+            {
+                default:
+                case Parity.None:
+                    termios.ControlFlag &= ~(uint)ControlFlags.PARENB;
+                    termios.ControlFlag &= ~(uint)ControlFlags.PARODD;
+                    //termios.InputFlag &= ~(uint)InputFlags.INPCK; 
+                    //termios.InputFlag &= ~(uint)InputFlags.PARMRK; 
+                    break;
+                case Parity.Odd:
+                    termios.ControlFlag |= (uint)ControlFlags.PARENB;
+                    termios.ControlFlag |= (uint)ControlFlags.PARODD;
+                    //termios.InputFlag |= (uint)InputFlags.INPCK;
+                    //termios.InputFlag &= ~(uint)InputFlags.PARMRK;
+                    break;
+                case Parity.Even:
+                    termios.ControlFlag |= (uint)ControlFlags.PARENB;
+                    termios.ControlFlag &= ~(uint)ControlFlags.PARODD;
+                    //termios.InputFlag |= (uint)InputFlags.INPCK;
+                    //termios.InputFlag &= ~(uint)InputFlags.PARMRK;
+                    break;
+                case Parity.Mark:
+                    termios.ControlFlag |= (uint)ControlFlags.PARENB;
+                    termios.ControlFlag |= (uint)ControlFlags.PARODD;
+                    termios.ControlFlag |= (uint)ControlFlags.CMSPAR;
+                    //termios.InputFlag |= (uint)InputFlags.INPCK;
+                    //termios.InputFlag |= (uint)InputFlags.PARMRK;
+                    break;
+                case Parity.Space:
+                    termios.ControlFlag |= (uint)ControlFlags.PARENB;
+                    termios.ControlFlag &= ~(uint)ControlFlags.PARODD;
+                    termios.ControlFlag |= (uint)ControlFlags.CMSPAR;
+                    //termios.InputFlag |= (uint)InputFlags.INPCK;
+                    //termios.InputFlag |= (uint)InputFlags.PARMRK;
+                    break;
+            }
+            SetTermios(termios);
+        }
+
+        private void SetDataBits(int dataBits)
+        {
+            Termios termios = GetTermios();
+            termios.ControlFlag &= ~(uint)ControlFlags.CSIZE;
+            switch (dataBits)
+            {
+                case 5:
+                    termios.ControlFlag |= (uint)ControlFlags.CS5;
+                    break;
+                case 6:
+                    termios.ControlFlag |= (uint)ControlFlags.CS6;
+                    break;
+                case 7:
+                    termios.ControlFlag |= (uint)ControlFlags.CS7;
+                    break;
+                default:
+                case 8:
+                    termios.ControlFlag |= (uint)ControlFlags.CS8;
+                    break;
+            }
+            SetTermios(termios);
+        }
+
+        private void SetStopBits(StopBits stopBits)
+        {
+            Termios termios = GetTermios();
+            switch (stopBits)
+            {
+                
+                case StopBits.One:
+                    termios.ControlFlag &= ~(uint)ControlFlags.CSTOPB;
+                    break;
+                case StopBits.Two:
+                    termios.ControlFlag |= (uint)ControlFlags.CSTOPB;
+                    break;
+                default:
+                case StopBits.None:
+                case StopBits.OnePointFive:
+                    throw new ArgumentException($"StopBits only support One or Two");
+                    break;
+            }
+            SetTermios(termios);
+        }
+
+        private void SetHandshake(Handshake handshake)
+        {
+            Termios termios = GetTermios();
+            switch (handshake)
+            {
+                case Handshake.None:
+                    termios.ControlFlag &= ~(uint)(ControlFlags.CRTSCTS | ControlFlags.CDTRCTS);
+                    termios.InputFlag &= ~(uint)(InputFlags.IXON | InputFlags.IXOFF);
+                    break;
+                case Handshake.XOnXOff:
+                    termios.ControlFlag &= ~(uint)(ControlFlags.CRTSCTS | ControlFlags.CDTRCTS);
+                    termios.InputFlag |= (uint)(InputFlags.IXON | InputFlags.IXOFF);
+                    break;
+                case Handshake.RequestToSend:
+                    termios.ControlFlag |= (uint)ControlFlags.CRTSCTS;
+                    termios.ControlFlag &= (uint)ControlFlags.CDTRCTS;
+                    termios.InputFlag &= ~(uint)(InputFlags.IXON | InputFlags.IXOFF);
+                    break;
+                case Handshake.RequestToSendXOnXOff:
+                    termios.ControlFlag |= (uint)ControlFlags.CRTSCTS;
+                    termios.ControlFlag &= (uint)ControlFlags.CDTRCTS;
+                    termios.InputFlag |= (uint)(InputFlags.IXON | InputFlags.IXOFF);
+                    break;
+                default:
+                    break;
+            }
+            SetTermios(termios);
         }
 
         private void StartReading()
         {
-            if (!fd.HasValue)
-            {
-                throw new Exception();
-            }
+            if (!_FileDescriptor.HasValue) throw new Exception($"${nameof(SerialDevice)} not open");
+            
 
             while (true)
             {
-                CancellationToken.ThrowIfCancellationRequested();
+                _CancellationToken.ThrowIfCancellationRequested();
 
-                int res = Libc.read(fd.Value, readingBuffer, READING_BUFFER_SIZE);
+                int res = Libc.read(_FileDescriptor.Value, _ReadingBuffer, DefaultReadBuffer);
 
                 if (res != -1)
                 {
                     byte[] buf = new byte[res];
-                    Marshal.Copy(readingBuffer, buf, 0, res);
+                    Marshal.Copy(_ReadingBuffer, buf, 0, res);
 
                     OnDataReceived(buf);
                 }
@@ -89,30 +323,31 @@ namespace System.IO.Ports
             DataReceived?.Invoke(this, data);
         }
 
-        public bool IsOpened => fd.HasValue;
+        public bool IsOpened => _FileDescriptor.HasValue;
 
         public void Close()
         {
-            if (!fd.HasValue)
+            if (!_FileDescriptor.HasValue)
             {
                 throw new Exception();
             }
 
             cts.Cancel();
-            Libc.close(fd.Value);
-            Marshal.FreeHGlobal(readingBuffer);
+            Libc.close(_FileDescriptor.Value);
+            Marshal.FreeHGlobal(_ReadingBuffer);
+            _FileDescriptor = null;
         }
 
         public void Write(byte[] buf)
         {
-            if (!fd.HasValue)
+            if (!_FileDescriptor.HasValue)
             {
                 throw new Exception();
             }
 
             IntPtr ptr = Marshal.AllocHGlobal(buf.Length);
             Marshal.Copy(buf, 0, ptr, buf.Length);
-            Libc.write(fd.Value, ptr, buf.Length);
+            Libc.write(_FileDescriptor.Value, ptr, buf.Length);
             Marshal.FreeHGlobal(ptr);
         }
 
