@@ -15,7 +15,7 @@
     <PackageId>NetCoreSerial</PackageId>
     <Version>1.3.0</Version>
     <PackageReleaseNotes>pdated couple of issues</PackageReleaseNotes>
-    <PackageLicenseExpression>This package is realeased under MIT licence</PackageLicenseExpression>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
 </Project>
