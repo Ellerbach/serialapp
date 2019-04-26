@@ -5,6 +5,11 @@ using System.Text;
 namespace System.IO.Ports
 
 {
+    /// <summary>
+    /// Standard parity. Please note that there is no control
+    /// done on the combination of parity and number of bits.
+    /// Some are incompatible
+    /// </summary>
     public enum Parity
     {
         None = 0,

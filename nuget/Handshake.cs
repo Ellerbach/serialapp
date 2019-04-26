@@ -4,6 +4,9 @@ using System.Text;
 
 namespace System.IO.Ports
 {
+    /// <summary>
+    /// Standard handshake
+    /// </summary>
     public enum Handshake
     {
         None,

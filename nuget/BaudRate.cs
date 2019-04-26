@@ -1,5 +1,8 @@
 namespace System.IO.Ports
 {
+    /// <summary>
+    /// Baud rate supported in most Unix/Linux OS
+    /// </summary>
     public enum BaudRate : uint
     {
         B50 = 50,

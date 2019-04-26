@@ -33,18 +33,53 @@ namespace System.IO.Ports
 
         public event Action<object, byte[]> DataReceived;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="portName">Name of the serial port</param>
+        /// <param name="baudRate">Baud rate</param>
+        /// <param name="parity">PArity</param>
+        /// <param name="dataBits">Data bits</param>
+        /// <param name="stopBits">Stop bits</param>
         public SerialDevice(string portName, BaudRate baudRate, Parity parity, int dataBits, StopBits stopBits) : this(portName, baudRate, parity, dataBits, stopBits, DefaultHandshake)
         { }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="portName">Name of the serial port</param>
+        /// <param name="baudRate">Baud rate</param>
+        /// <param name="parity">PArity</param>
+        /// <param name="dataBits">Data bits</param>
         public SerialDevice(string portName, BaudRate baudRate, Parity parity, int dataBits) : this(portName, baudRate, parity, dataBits, DefaultStopBits, DefaultHandshake)
         { }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="portName">Name of the serial port</param>
+        /// <param name="baudRate">Baud rate</param>
+        /// <param name="parity">PArity</param>
         public SerialDevice(string portName, BaudRate baudRate, Parity parity) : this(portName, baudRate, parity, DefaultDataBits, DefaultStopBits, DefaultHandshake)
         { }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="portName">Name of the serial port</param>
+        /// <param name="baudRate">Baud rate</param>
         public SerialDevice(string portName, BaudRate baudRate) : this(portName, baudRate, DefaultParity, DefaultDataBits, DefaultStopBits, DefaultHandshake)
         { }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="portName">Name of the serial port</param>
+        /// <param name="baudRate">Baud rate</param>
+        /// <param name="parity">PArity</param>
+        /// <param name="dataBits">Data bits</param>
+        /// <param name="stopBits">Stop bits</param>
+        /// <param name="handshake">Handshake</param>
         public SerialDevice(string portName, BaudRate baudRate, Parity parity, int dataBits, StopBits stopBits, Handshake handshake)
         {
             _PortName = portName;
@@ -55,6 +90,10 @@ namespace System.IO.Ports
             _Handshake = handshake;
         }
 
+        /// <summary>
+        /// Baud rate
+        /// All Baud rate may not be supported depending on your hardware
+        /// </summary>
         public BaudRate BaudRate
         {
             get { return _BaudRate; }
@@ -68,6 +107,9 @@ namespace System.IO.Ports
             }
         }
 
+        /// <summary>
+        /// Data bits from 5 to 8
+        /// </summary>
         public int DataBits
         {
             get { return _DataBits; }
@@ -82,6 +124,9 @@ namespace System.IO.Ports
             }
         }
 
+        /// <summary>
+        /// Parity
+        /// </summary>
         public Parity Parity
         {
             get { return _Parity; }
@@ -95,6 +140,9 @@ namespace System.IO.Ports
             }
         }
 
+        /// <summary>
+        /// Stop bits
+        /// </summary>
         public StopBits StopBits
         {
             get { return _StopBits;  }
@@ -108,6 +156,9 @@ namespace System.IO.Ports
             }
         }
 
+        /// <summary>
+        /// Handshake
+        /// </summary>
         public Handshake Handshake
         {
             get { return _Handshake;  }
@@ -121,8 +172,14 @@ namespace System.IO.Ports
             }
         }
 
+        /// <summary>
+        /// Is the port open
+        /// </summary>
         public bool IsOpen => _FileDescriptor.HasValue;
 
+        /// <summary>
+        /// Open the serial port
+        /// </summary>
         public void Open()
         {
             if (IsOpen) throw new IOException($"Port already open");
@@ -323,8 +380,9 @@ namespace System.IO.Ports
             DataReceived?.Invoke(this, data);
         }
 
-        public bool IsOpened => _FileDescriptor.HasValue;
-
+        /// <summary>
+        /// Close the port
+        /// </summary>
         public void Close()
         {
             if (!_FileDescriptor.HasValue)
@@ -338,6 +396,10 @@ namespace System.IO.Ports
             _FileDescriptor = null;
         }
 
+        /// <summary>
+        /// Write a buffer of bytes
+        /// </summary>
+        /// <param name="buf"></param>
         public void Write(byte[] buf)
         {
             if (!_FileDescriptor.HasValue)
@@ -351,6 +413,10 @@ namespace System.IO.Ports
             Marshal.FreeHGlobal(ptr);
         }
 
+        /// <summary>
+        /// Get all possible serial ports
+        /// </summary>
+        /// <returns></returns>
         public static string[] GetPortNames()
         {
             int p = (int)Environment.OSVersion.Platform;
@@ -384,10 +450,13 @@ namespace System.IO.Ports
             return serial_ports.ToArray();
         }
 
+        /// <summary>
+        /// Dispose the port
+        /// </summary>
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-            if (IsOpened)
+            if (IsOpen)
             {
                 Close();
             }

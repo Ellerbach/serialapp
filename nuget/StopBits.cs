@@ -4,6 +4,10 @@ using System.Text;
 
 namespace System.IO.Ports
 {
+    /// <summary>
+    /// Stop bits
+    /// note that only One and Two are implemented
+    /// </summary>
     public enum StopBits
     {
         None = 0,

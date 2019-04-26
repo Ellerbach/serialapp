@@ -25,6 +25,12 @@ Then reboot. Once rebooted, you will have to activate in the boot option the ser
 
 ### Enabling the UART
 
+**Easy way**
+
+Just run ```sudo raspi-config``` then ```Interfacing Options``` then ```Serial``` then select ```No```to console login then select ```Yes```to embedded serial port. Exit the program and then reboot with ```sudo shutdown -r now```.
+
+**Longer way** Not recommended and that won't disable the console port
+
 For this, you'll have to edit **/boot/cmdline.txt** and **/boot/config.txt**
 Open a console, then ```cd /boot``` I usually then use leafpad to edit any config file. I prefer the graphical interface. For this, you'll need admin right to overright config files, so just type ```sudo leafpad```. Open the /boot/cmdline.txt file and remove ```console=ttyS0,115200``` or equivalent. Keep the ```console=tty1```. Save the file.
 
@@ -50,6 +56,8 @@ If all is activated, you'll get the 2 serials showing like in the picture above.
 **Important note 2**: if you plugged other serial devices on USB port, they'll appear as well in the list
 
 ## Step 2: installing .NET Core 2.0 on the Rapsberry
+
+**This step is not needed anymore** if you are packaging the application as explained in Step 4. You still may need to install the dependencies.
 
 **Important note**: Officially the .NET Core 2.0 is not released while I am writing those lines. And Linux ARM support is still in beta.
 
