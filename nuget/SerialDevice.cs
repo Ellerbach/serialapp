@@ -433,6 +433,7 @@ namespace System.IO.Ports
                         || dev.StartsWith("/dev/ttyUSB")
                         || dev.StartsWith("/dev/ttyACM")
                         || dev.StartsWith("/dev/ttyAMA")
+                        || dev.StartsWith("/dev/ttyPS")
                         || dev.StartsWith("/dev/serial"))
                     {
                         serial_ports.Add(dev);
