@@ -419,11 +419,10 @@ namespace System.IO.Ports
         /// <returns></returns>
         public static string[] GetPortNames()
         {
-            int p = (int)Environment.OSVersion.Platform;
             List<string> serial_ports = new List<string>();
 
             // Are we on Unix?
-            if (p == 4 || p == 128 || p == 6)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 string[] ttys = System.IO.Directory.GetFiles("/dev/", "tty*");
                 foreach (string dev in ttys)
@@ -442,6 +441,14 @@ namespace System.IO.Ports
                 }
                 //newer Pi with bluetooth map serial
                 ttys = System.IO.Directory.GetFiles("/dev/", "serial*");
+                foreach (string dev in ttys)
+                {
+                    serial_ports.Add(dev);
+                }
+            }
+            else if(RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                var ttys = System.IO.Directory.GetFiles("/dev/", "tty.*");
                 foreach (string dev in ttys)
                 {
                     serial_ports.Add(dev);
